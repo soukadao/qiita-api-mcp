@@ -2,11 +2,55 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import debug from 'debug';
 import { fetchItems } from '../get-items-tool/index.js';
+import { VERSION } from '../../shared/config.js';
 
 const log = debug('mcp:qiita');
 
-export async function fetchItemsToolWrapper(args: { page?: number; per_page?: number; query?: string; additional_fields?: string[] }) {
-  const result = await fetchItems(args);
+export async function fetchItemsToolWrapper(args: { page?: number | string; per_page?: number | string; created_from?: Date | string; created_to?: Date | string; additional_fields?: string[] }) {
+  const params: any = { ...args };
+
+  if (params.page !== undefined) {
+    if (params.page === '' || params.page === null) {
+      delete params.page;
+    } else if (typeof params.page === 'string') {
+      params.page = parseInt(params.page, 10);
+      if (isNaN(params.page)) {
+        delete params.page;
+      }
+    }
+  }
+
+  if (params.per_page !== undefined) {
+    if (params.per_page === '' || params.per_page === null) {
+      delete params.per_page;
+    } else if (typeof params.per_page === 'string') {
+      params.per_page = parseInt(params.per_page, 10);
+      if (isNaN(params.per_page)) {
+        delete params.per_page;
+      }
+    }
+  }
+
+  if (params.created_from !== undefined) {
+    if (typeof params.created_from === 'string') {
+      if (params.created_from === '') {
+        delete params.created_from;
+      } else {
+        params.created_from = new Date(params.created_from);
+      }
+    }
+  }
+  if (params.created_to !== undefined) {
+    if (typeof params.created_to === 'string') {
+      if (params.created_to === '') {
+        delete params.created_to;
+      } else {
+        params.created_to = new Date(params.created_to);
+      }
+    }
+  }
+
+  const result = await fetchItems(params);
 
   return result.match(
     (success: any) => ({
@@ -37,7 +81,7 @@ export function createStdioServer(): McpServer {
 
   const server = new McpServer({
     name: "qiita-api-mcp",
-    version: "1.0.0",
+    version: VERSION,
     capabilities: {
       resources: {},
       tools: {},
@@ -47,11 +91,12 @@ export function createStdioServer(): McpServer {
   // Register the "get_items" tool
   server.tool(
     "get_items",
-    "Fetch Qiita items with optional pagination and search. By default returns: title, url, created_at, user.name. Use additional_fields to include more fields.",
+    "Fetch Qiita items with optional pagination and date filtering. By default returns: title, url, created_at. Use additional_fields to include more fields.",
     {
-      page: z.number().int().min(1).max(100).optional(),
-      per_page: z.number().int().min(1).max(100).optional(),
-      query: z.string().optional(),
+      page: z.coerce.number().int().min(1).max(100).optional(),
+      per_page: z.coerce.number().int().min(1).max(100).optional(),
+      created_from: z.coerce.date().optional().describe("Filter items created on or after this date (accepts various date formats)"),
+      created_to: z.coerce.date().optional().describe("Filter items created on or before this date (accepts various date formats)"),
       additional_fields: z.array(z.string()).optional().describe("Additional fields to include in response (e.g., ['id', 'tags', 'user.id'])"),
     },
     fetchItemsToolWrapper

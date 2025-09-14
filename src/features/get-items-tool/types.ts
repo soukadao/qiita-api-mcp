@@ -42,13 +42,15 @@ export interface Item {
 export interface FetchItemsParams {
   page?: number;
   per_page?: number;
-  query?: string;
+  created_from?: Date;
+  created_to?: Date;
   additional_fields?: string[];
 }
 
 export const FetchItemsParamsSchema = z.object({
   page: z.number().int().min(1).max(100).optional(),
   per_page: z.number().int().min(1).max(100).optional(),
-  query: z.string().optional(),
+  created_from: z.date().optional(),
+  created_to: z.date().optional(),
   additional_fields: z.array(z.string()).optional()
 });

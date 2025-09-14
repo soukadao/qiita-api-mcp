@@ -1,18 +1,20 @@
 # qiita-api-mcp
 
-## Tools
+## ツール
 
-### 1. `get_items`: Retrieve the list of articles
+### 1. `get_items`: 記事の一覧を返す
 
 api: https://qiita.com/api/v2/docs#get-apiv2items
 
-**parameter**
+**パラメーター**
 
   - page
   - per_page
-  - query
+  - created_from
+  - created_to
+  - additional_fields
 
-## NPM Setup
+## NPMセットアップ
 
 ```json
 {
@@ -28,7 +30,7 @@ api: https://qiita.com/api/v2/docs#get-apiv2items
 }
 ```
 
-## Local Setup
+## ローカルセットアップ
 
 ```bash
 $ git clone https://github.com/soukadao/qiita-api-mcp.git

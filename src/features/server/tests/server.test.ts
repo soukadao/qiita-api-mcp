@@ -157,14 +157,10 @@ describe('server', () => {
       const parsedItems = JSON.parse(result.content[0].text);
       expect(Array.isArray(parsedItems)).toBe(true);
       expect(parsedItems).toHaveLength(2);
-
-      // Default fields should be included
       expect(parsedItems[0].title).toBe('Test Article 1');
       expect(parsedItems[0].url).toBe('https://qiita.com/test/items/1');
       expect(parsedItems[0].created_at).toBe('2023-01-01T00:00:00Z');
-      expect(parsedItems[0].user.name).toBe('Test User');
 
-      // Additional fields should NOT be included in default response
       expect(parsedItems[0].id).toBeUndefined();
       expect(parsedItems[0].likes_count).toBeUndefined();
       expect(parsedItems[0].body).toBeUndefined();
@@ -246,19 +242,15 @@ describe('server', () => {
       expect(parsedItems).toHaveLength(1);
 
       const item = parsedItems[0];
-      // Default fields
       expect(item.title).toBe('Test Article 1');
       expect(item.url).toBe('https://qiita.com/test/items/1');
       expect(item.created_at).toBe('2023-01-01T00:00:00Z');
-      expect(item.user.name).toBe('Test User');
 
-      // Additional fields
       expect(item.id).toBe('1');
       expect(item.likes_count).toBe(10);
       expect(item.tags).toEqual([{ name: 'JavaScript', versions: [] }]);
       expect(item.user.id).toBe('user1');
 
-      // Fields not requested should be undefined
       expect(item.body).toBeUndefined();
       expect(item.comments_count).toBeUndefined();
     });
@@ -269,7 +261,7 @@ describe('server', () => {
         json: () => Promise.resolve([])
       });
 
-      await fetchItemsToolWrapper({ page: 2, per_page: 10, query: 'JavaScript' });
+      await fetchItemsToolWrapper({ page: 2, per_page: 10, created_from: new Date('2023-01-01'), created_to: new Date('2023-12-31') });
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('page=2'),
@@ -280,7 +272,7 @@ describe('server', () => {
         expect.any(Object)
       );
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('query=JavaScript'),
+        expect.stringContaining('query=created%3A%3E%3D2023-01-01+created%3A%3C%3D2023-12-31'),
         expect.any(Object)
       );
     });
@@ -302,6 +294,52 @@ describe('server', () => {
         })
       );
     });
+
+    it('should handle string date parameters for created_from', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+
+      await fetchItemsToolWrapper({ created_from: '2023-01-01' });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('query=created%3A%3E%3D2023-01-01'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle string date parameters for created_to', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+
+      await fetchItemsToolWrapper({ created_to: '2023-12-31' });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('query=created%3A%3C%3D2023-12-31'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle both string date parameters', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+
+      await fetchItemsToolWrapper({
+        created_from: '2023-01-01',
+        created_to: '2023-12-31'
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('query=created%3A%3E%3D2023-01-01+created%3A%3C%3D2023-12-31'),
+        expect.any(Object)
+      );
+    });
+
   });
 
   describe('server tool registration', () => {

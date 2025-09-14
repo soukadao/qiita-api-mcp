@@ -63,13 +63,11 @@ describe('fetchItems', () => {
       expect(result.value).toHaveLength(1);
       const item = result.value[0];
 
-      // Default fields should be included
       expect(item.title).toBe('Test Article');
       expect(item.url).toBe('https://qiita.com/test/items/1');
       expect(item.created_at).toBe('2023-01-01T00:00:00Z');
-      expect(item.user.name).toBe('Test User');
 
-      // Other fields should NOT be included
+      expect(item.user).toBeUndefined();
       expect(item.id).toBeUndefined();
       expect(item.body).toBeUndefined();
       expect(item.likes_count).toBeUndefined();
@@ -125,7 +123,7 @@ describe('fetchItems', () => {
     });
 
     const params: FetchItemsParams = {
-      additional_fields: ['id', 'likes_count', 'tags', 'user.id']
+      additional_fields: ['id', 'likes_count', 'tags', 'user.id', 'user.name']
     };
 
     const result = await fetchItems(params);
@@ -135,19 +133,15 @@ describe('fetchItems', () => {
       expect(result.value).toHaveLength(1);
       const item = result.value[0] as any;
 
-      // Default fields should be included
       expect(item.title).toBe('Test Article');
       expect(item.url).toBe('https://qiita.com/test/items/1');
       expect(item.created_at).toBe('2023-01-01T00:00:00Z');
-      expect(item.user.name).toBe('Test User');
-
-      // Additional fields should be included
       expect(item.id).toBe('1');
       expect(item.likes_count).toBe(10);
       expect(item.tags).toEqual([{ name: 'JavaScript', versions: [] }]);
       expect(item.user.id).toBe('user1');
+      expect(item.user.name).toBe('Test User');
 
-      // Other fields should NOT be included
       expect(item.body).toBeUndefined();
       expect(item.comments_count).toBeUndefined();
     }
@@ -157,7 +151,8 @@ describe('fetchItems', () => {
     const params: FetchItemsParams = {
       page: 2,
       per_page: 10,
-      query: 'JavaScript'
+      created_from: new Date('2023-01-01'),
+      created_to: new Date('2023-12-31')
     };
 
     (global.fetch as any).mockResolvedValueOnce({
@@ -176,7 +171,7 @@ describe('fetchItems', () => {
       expect.any(Object)
     );
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('query=JavaScript'),
+      expect.stringContaining('query=created%3A%3E%3D2023-01-01+created%3A%3C%3D2023-12-31'),
       expect.any(Object)
     );
   });
@@ -258,6 +253,61 @@ describe('fetchItems', () => {
     if (result.isErr()) {
       expect(result.error.message).toContain('Invalid parameters');
     }
+  });
+
+  it('should handle various date formats with coerce.date()', async () => {
+    const params: FetchItemsParams = {
+      created_from: new Date('2023-01-01T00:00:00Z')
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    const result = await fetchItems(params);
+
+    expect(result.isOk()).toBe(true);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('query=created%3A%3E%3D2023-01-01'),
+      expect.any(Object)
+    );
+  });
+
+  it('should build query with only created_from', async () => {
+    const params: FetchItemsParams = {
+      created_from: new Date('2023-01-01')
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('query=created%3A%3E%3D2023-01-01'),
+      expect.any(Object)
+    );
+  });
+
+  it('should build query with only created_to', async () => {
+    const params: FetchItemsParams = {
+      created_to: new Date('2023-12-31')
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('query=created%3A%3C%3D2023-12-31'),
+      expect.any(Object)
+    );
   });
 
   it('should work without parameters', async () => {
