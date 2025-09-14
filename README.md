@@ -21,7 +21,7 @@ api: https://qiita.com/api/v2/docs#get-apiv2items
       "command": "npx",
       "args": ["-y", "qiita-api-mcp"],
       "env": {
-        "QIITA_API_ACCESSS_TOKEN": "${QIITA_API_ACCESSS_TOKEN}"
+        "QIITA_API_ACCESS_TOKEN": "${QIITA_API_ACCESS_TOKEN}"
       }
     }
   }
@@ -42,7 +42,7 @@ qiita-api-mcp $ npm run build
       "command": "node",
       "args": ["qiita-api-mcp/dist/app/index.js"],
       "env": {
-        "QIITA_API_ACCESSS_TOKEN": "${QIITA_API_ACCESSS_TOKEN}"
+        "QIITA_API_ACCESS_TOKEN": "${QIITA_API_ACCESS_TOKEN}"
       }
     }
   }
@@ -52,5 +52,5 @@ qiita-api-mcp $ npm run build
 ## Inspector
 
 ```bash
-$ npx @modelcontextprotocol/inspector node dist/app/index.js -e QIITA_API_ACCESSS_TOKEN=xxxxxxxxxxxxxxxxxx
+$ npx @modelcontextprotocol/inspector node dist/app/index.js -e QIITA_API_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxx
 ```

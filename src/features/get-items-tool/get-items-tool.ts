@@ -1,8 +1,8 @@
 import { Result, ok, err } from 'neverthrow';
-import { BASE_URL, QIITA_API_ACCESSS_TOKEN } from '../../shared/config.js';
+import { BASE_URL, QIITA_API_ACCESS_TOKEN } from '../../shared/config.js';
 import { Item, FetchItemsParams, FetchItemsParamsSchema } from './types.js';
 
-const accessToken = QIITA_API_ACCESSS_TOKEN;
+const accessToken = QIITA_API_ACCESS_TOKEN;
 
 async function fetchItems(params: FetchItemsParams = {}): Promise<Result<any[], Error>> {
   // パラメータのバリデーション
