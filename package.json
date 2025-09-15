@@ -1,6 +1,6 @@
 {
   "name": "qiita-api-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "bin": "./dist/app/index.js",
@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soukadao/qiita-mcp.git"
+    "url": "git+https://github.com/soukadao/qiita-api-mcp.git"
   },
   "keywords": [],
   "author": "soukadao",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/soukadao/qiita-mcp/issues"
+    "url": "https://github.com/soukadao/qiita-api-mcp/issues"
   },
-  "homepage": "https://github.com/soukadao/qiita-mcp#readme",
+  "homepage": "https://github.com/soukadao/qiita-api-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",
     "date-fns": "^4.1.0",
