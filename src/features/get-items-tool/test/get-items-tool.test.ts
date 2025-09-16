@@ -342,4 +342,79 @@ describe('fetchItems', () => {
       })
     );
   });
+
+  it('should include tags in query with single tag', async () => {
+    const params: FetchItemsParams = {
+      tags: ['Rails']
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('query=tag%3ARails'),
+      expect.any(Object)
+    );
+  });
+
+  it('should include tags in query with multiple tags', async () => {
+    const params: FetchItemsParams = {
+      tags: ['Ruby', 'Rails']
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('query=tag%3ARuby%2CRails'),
+      expect.any(Object)
+    );
+  });
+
+  it('should combine tags with date filters', async () => {
+    const params: FetchItemsParams = {
+      tags: ['JavaScript', 'TypeScript'],
+      created_from: new Date('2023-01-01'),
+      created_to: new Date('2023-12-31')
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    const calledUrl = (global.fetch as any).mock.calls[0][0];
+    expect(calledUrl).toContain('query=');
+    expect(decodeURIComponent(calledUrl)).toContain('created:>=2023-01-01');
+    expect(decodeURIComponent(calledUrl)).toContain('created:<=2023-12-31');
+    expect(decodeURIComponent(calledUrl)).toContain('tag:JavaScript,TypeScript');
+  });
+
+  it('should handle empty tags array', async () => {
+    const params: FetchItemsParams = {
+      tags: []
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    await fetchItems(params);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.not.stringContaining('tag:'),
+      expect.any(Object)
+    );
+  });
 });

@@ -6,7 +6,7 @@ import { VERSION } from '../../shared/config.js';
 
 const log = debug('mcp:qiita');
 
-export async function fetchItemsToolWrapper(args: { page?: number | string; per_page?: number | string; created_from?: Date | string; created_to?: Date | string; additional_fields?: string[] }) {
+export async function fetchItemsToolWrapper(args: { page?: number | string; per_page?: number | string; created_from?: Date | string; created_to?: Date | string; tags?: string[]; additional_fields?: string[] }) {
   const params: any = { ...args };
 
   if (params.page !== undefined) {
@@ -91,12 +91,13 @@ export function createStdioServer(): McpServer {
   // Register the "get_items" tool
   server.tool(
     "get_items",
-    "Fetch Qiita items with optional pagination and date filtering. By default returns: title, url, created_at. Use additional_fields to include more fields.",
+    "Fetch Qiita items with optional pagination, date filtering, and tag filtering. By default returns: title, url, created_at. Use additional_fields to include more fields.",
     {
       page: z.coerce.number().int().min(1).max(100).optional(),
       per_page: z.coerce.number().int().min(1).max(100).optional(),
       created_from: z.coerce.date().optional().describe("Filter items created on or after this date (accepts various date formats)"),
       created_to: z.coerce.date().optional().describe("Filter items created on or before this date (accepts various date formats)"),
+      tags: z.array(z.string()).optional().describe("Filter items by tags (e.g., ['Rails'] for single tag, ['Ruby', 'Rails'] for multiple tags)"),
       additional_fields: z.array(z.string()).optional().describe("Additional fields to include in response (e.g., ['id', 'tags', 'user.id'])"),
     },
     fetchItemsToolWrapper

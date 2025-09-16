@@ -44,6 +44,7 @@ export interface FetchItemsParams {
   per_page?: number;
   created_from?: Date;
   created_to?: Date;
+  tags?: string[];
   additional_fields?: string[];
 }
 
@@ -52,5 +53,6 @@ export const FetchItemsParamsSchema = z.object({
   per_page: z.number().int().min(1).max(100).optional(),
   created_from: z.date().optional(),
   created_to: z.date().optional(),
+  tags: z.array(z.string()).optional(),
   additional_fields: z.array(z.string()).optional()
 });

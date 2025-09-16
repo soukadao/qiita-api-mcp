@@ -12,6 +12,7 @@ api: https://qiita.com/api/v2/docs#get-apiv2items
   - per_page
   - created_from
   - created_to
+  - tags
   - additional_fields
 
 ## NPMセットアップ

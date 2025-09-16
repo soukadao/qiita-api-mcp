@@ -27,6 +27,9 @@ async function fetchItems(params: FetchItemsParams = {}): Promise<Result<any[], 
   if (params.created_to) {
     queryParts.push(`created:<=${format(params.created_to, 'yyyy-MM-dd')}`);
   }
+  if (params.tags && params.tags.length > 0) {
+    queryParts.push(`tag:${params.tags.join(',')}`);
+  }
   if (queryParts.length > 0) {
     searchParams.append('query', queryParts.join(' '));
   }
